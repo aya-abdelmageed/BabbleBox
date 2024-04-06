@@ -1,41 +1,44 @@
 {
-    "compilerOptions": {
-      "target": "es5",
-      "allowJs": true,
-      "skipLibCheck": true,
-  
-      "esModuleInterop": true,
-      "allowSyntheticDefaultImports": true,
-      // "strict": true,
-      "forceConsistentCasingInFileNames": true,
-      "noFallthroughCasesInSwitch": true,
-      "module": "CommonJS",
-      "moduleResolution": "node",
-      "resolveJsonModule": true,
-      "isolatedModules": true,
-      // "noEmit": true,
-      "outDir": "dist",
-      "rootDir": ".",
-      // "baseUrl": ".",
-      
-      "paths": {
+  "compilerOptions": {
+    "target": "es5",
+    "allowJs": true,
+    "skipLibCheck": true,
 
-        "models/*": ["./src/models/*"],
-        
-        "helpers/*": ["./src/helpers/*"]
-      },
-      "plugins": [
-        /* Transform paths in output .js files */
-        {
-          "transform": "typescript-transform-paths"
-        },
-        /* Transform paths in output .d.ts files */
-        {
-          "transform": "typescript-transform-paths",
-          "afterDeclarations": true
-        }
-      ]
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    // "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    // "noEmit": true,
+    "outDir": "dist",
+    "rootDir": ".",
+    // "baseUrl": ".",
+
+    "paths": {
+      "controllers/*": ["./src/controllers/*"],
+      "models/*": ["./src/models/*"],
+      "services/*": ["./src/services/*"],
+      "utils/*": ["./src/utils/*"],
+      "config/*": ["./src/config/*"],
+      "middlewares/*": ["./src/middlewares/*"],
+      "routes/*": ["./src/routes/*"],
+      "helpers/*": ["./src/helpers/*"]
     },
-    "include": ["src/**/*.ts", "src/**/*.js"]
-  }
-  
+    "plugins": [
+      /* Transform paths in output .js files */
+      {
+        "transform": "typescript-transform-paths"
+      },
+      /* Transform paths in output .d.ts files */
+      {
+        "transform": "typescript-transform-paths",
+        "afterDeclarations": true
+      }
+    ]
+  },
+  "include": ["src/**/*.ts", "src/**/*.js"]
+}

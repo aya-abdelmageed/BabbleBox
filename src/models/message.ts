@@ -34,9 +34,6 @@ interface MessageDoc extends Document {
 }
 
 // Define schema for Message model
-/**
- * Represents the schema for a message in the application.
- */
 const MessageSchema: Schema = new Schema(
   {
     sender: {

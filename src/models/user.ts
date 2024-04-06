@@ -1,9 +1,9 @@
 import  { Schema, Document, model } from "mongoose";
 
-// Define interface for User document in the database.
+// Define interface for User document
 interface UserDoc extends Document {
   username: string;
-  name: string;
+    name: string;
   email: string;
   password: string;
   profilePicture?: string;
@@ -26,8 +26,7 @@ interface UserDoc extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
-// Define the UserGroup schema.
-// It defines the structure of a UserGroup document in the database.
+
 const UserGroup = {
   group: {
     type: Schema.Types.ObjectId,
@@ -50,8 +49,7 @@ const UserGroup = {
   },
 };
 
-// Define the main schema for the User model.
-// It defines the structure of a User document in the database.
+// Define schema for User model
 const UserSchema: Schema = new Schema(
   {
     username: { type: String, required: true, unique: true },

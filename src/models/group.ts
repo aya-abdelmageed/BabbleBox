@@ -23,9 +23,6 @@ interface GroupDoc extends Document {
 }
 
 // Define schema for Group model
-/**
- * Represents the schema for a group in the application.
- */
 const GroupSchema = new Schema(
   {
     name: { type: String, required: true, unique: true },
