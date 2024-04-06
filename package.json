@@ -1,0 +1,22 @@
+{
+  "name": "babblebox",
+  "version": "1.0.0",
+  "description": "## Introduction BabbleBox is a chat application developed as the final project for the ALX program.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/express": "^4.17.21",
+    "@types/mongoose": "^5.11.97",
+    "@types/socket.io": "^3.0.2",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.0",
+    "socket.io": "^4.7.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.4"
+  }
+}
