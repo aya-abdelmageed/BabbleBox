@@ -1,6 +1,6 @@
 
 import { UserModel } from "./user";
+import { GroupModel } from "./group";
 
 
-
-export { UserModel};
+export { UserModel, GroupModel};
