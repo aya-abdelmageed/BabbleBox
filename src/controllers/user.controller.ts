@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { UserModel } from "models/index";
 import { generateJWT } from "helpers/jwt";
-import { uploadFile } from "helpers/fileUploader";
+
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -75,7 +75,7 @@ const updateUser = async (req: Request, res: Response) => {
     const profilePicture = req.file;
 
     const profilePictureUrl = profilePicture
-      ? await uploadFile(profilePicture, "profilePictures")
+      ? ""
       : "";
 
     const user = await UserModel.findByIdAndUpdate(
