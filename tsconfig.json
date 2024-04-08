@@ -26,7 +26,9 @@
       "config/*": ["./src/config/*"],
       "middlewares/*": ["./src/middlewares/*"],
       "routes/*": ["./src/routes/*"],
-      "helpers/*": ["./src/helpers/*"]
+      "helpers/*": ["./src/helpers/*"],
+      "sockets/*": ["./src/sockets/*"],
+      "redisControllers/*": ["./src/redisControllers/*"]
     },
     "plugins": [
       /* Transform paths in output .js files */

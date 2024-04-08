@@ -11,6 +11,7 @@ import { Server } from "socket.io";
 import setupSocket from "./helpers/connectSocket";
 import path from "path";
 import { authenticateJWTSocket } from "middlewares/auth";
+// import connectRedis from "helpers/connectRedis";
 // Create Express app
 const app = express();
 
@@ -37,6 +38,7 @@ app.use("*", (req, res) => {
 
 // Connect to MongoDB
 startConnection();
+// connectRedis();
 
 // Routes
 app.get("/", async (req, res) => {

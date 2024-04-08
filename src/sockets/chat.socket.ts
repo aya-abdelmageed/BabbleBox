@@ -1,91 +1,63 @@
-import { UserModel, ChatModel, MessageModel } from "models/index";
+import { ChatModel, MessageModel, UserModel } from "models/index";
+import
+  {
+    deleteMessage,
+    saveMessage,
+    saveReactedMessage,
+    togglePinMessage,
+  } from "redisControllers/chat.redis";
 import { Socket } from "socket.io";
-import { generateJWT } from "helpers/jwt";
-import { uploadFile } from "helpers/fileUploader";
+import { connectedUsers } from "./index";
 
-// const checkUserJionedRoom = async (chatId, userId,io, socket) => {
+export const SEND_MESSAGE = "send-message";
+export const READ_MESSAGE = "read-message";
+export const DELETE_MESSAGE = "delete-message";
+export const TOGGLE_PIN_MESSAGE = "toggle-pin-message";
 
-//   if(socket.rooms.has(chatId)){
-//     return;
-//   }
-//   else{
-//     const chat = await ChatModel.findById(chatId);
-//     if(chat.members.includes(userId)){
-//       socket.join(chatId);
-//       io.to(chatId).emit(JION_CHAT_ROOM, chatId);
-//     }
+export const TOGGLE_MESSAGE_REACT = "toggle-message-react";
 
-// }
+const createNewChat = async ({ senderId, recipientId, chatId }) => {
+  try {
+    const recipient = await UserModel.findById(recipientId);
+    const sender = await UserModel.findById(senderId);
+    const chat = await ChatModel.findOne({
+      members: { $all: [senderId, recipientId] },
+    });
+    if (!chat) {
+      const newChat = new ChatModel({
+        members: [senderId, recipient._id],
+      });
+      await newChat.save();
+      sender.chats.push(newChat._id);
+      recipient.chats.push(newChat._id);
+      await sender.save();
+      await recipient.save();
 
-const JION_CHAT_ROOM = "join-chat-room";
-const SEND_MESSAGE = "send-message";
-const READ_MESSAGE = "read-message";
-const EDIT_MESSAGE = "edit-message";
-const DELETE_MESSAGE = "delete-message";
-const PIN_MESSAGE = "pin-message";
-const UNPIN_MESSAGE = "unpin-message";
-const REACT_MESSAGE = "react-message";
-const UNREACT_MESSAGE = "unreact-message";
+      chatId = newChat._id;
+    }
+  } catch (error) {
+    console.error("Error in createNewChat:", error);
+  }
+};
 
 const chatSockets = (io: any, socket: Socket) => {
-  // Join chat room
-  socket.on(JION_CHAT_ROOM, async ({ chatId, userId }) => {
-    const user = await UserModel.findByIdAndUpdate(userId);
-    if (user) {
-      socket.join(chatId);
-      user.chats.push(chatId);
-      await user.save();
-    }
-  });
-
   // Send message
   socket.on(SEND_MESSAGE, async (data) => {
     try {
-      let {
-        chatId,
-        senderId,
-        text,
-        mediaType,
-        mediaData,
-        mediaName,
-        recipientUserName,
-      } = data;
-      let newChat = chatId ? false : true;
-      if (!chatId) {
-        const recipient = await UserModel.findOne({
-          username: recipientUserName,
+      let { chatId, senderId, text, mediaType, mediaContent, recipientId } =
+        data;
+
+      if (!chatId)
+        await createNewChat({
+          senderId,
+          recipientId,
+          chatId,
         });
-        const sender = await UserModel.findById(senderId);
-        const chat = await ChatModel.findOne({
-          members: { $all: [senderId, recipient._id] },
-        });
-        if (!chat) {
-          const newChat = new ChatModel({
-            members: [senderId, recipient._id],
-          });
-          await newChat.save();
-          sender.chats.push(newChat._id);
-          await sender.save();
-          console.log("newChat created", newChat);
-          chatId = newChat._id;
-          socket.join(chatId);
-        }
-      }
+
       socket.join(chatId);
-
-      let mediaContent = "";
-      if (mediaType && mediaData) {
-        const buffer = Buffer.from(mediaData, "base64");
-        const file = {
-          originalname: mediaName,
-          mimetype: mediaType,
-          buffer,
-        };
-        mediaContent = await uploadFile(file, "chat-media");
-      }
-
       const newMessageData = {
         chat: chatId,
+        recipient: recipientId,
         sender: senderId,
         content: text,
         media: {
@@ -94,13 +66,73 @@ const chatSockets = (io: any, socket: Socket) => {
         },
       };
       const newMessage = new MessageModel(newMessageData);
+
+      if (!connectedUsers.has(recipientId))
+        saveMessage(newMessage, recipientId);
+      else io.to(recipientId).emit(READ_MESSAGE, newMessage);
+
       await newMessage.save();
-      io.to(chatId).emit(READ_MESSAGE, {
-        ...newMessage._doc,
-        newChat,
-      });
     } catch (error) {
       console.error("Error in send-message:", error);
+    }
+  });
+
+  socket.on(TOGGLE_PIN_MESSAGE, async (data) => {
+    try {
+      const { messageId, chatId, recipientId, isPinned } = data;
+      const message = await MessageModel.findByIdAndUpdate(messageId, {
+        isPinned,
+      });
+
+      if (!message) {
+        return;
+      }
+      if (!connectedUsers.has(recipientId))
+        togglePinMessage(message, recipientId);
+      else io.to(recipientId).emit(TOGGLE_PIN_MESSAGE, message);
+    } catch (error) {
+      console.error("Error in pin-message:", error);
+    }
+  });
+
+  socket.on(TOGGLE_MESSAGE_REACT, async (data) => {
+    try {
+      const { userId, messageId, chatId, recipientId, reaction, event } = data;
+      const message = await MessageModel.findById(messageId);
+
+      if (!message) {
+        return;
+      }
+      if (event === "remove") {
+        message.reactions = message.reactions.filter((r) => r.user !== userId);
+      } else {
+        const react = message.reactions.find((r) => r.user === userId);
+        if (react) {
+          react.emoji = reaction;
+        } else {
+          message.reactions.push({ user: userId, emoji: reaction });
+        }
+      }
+
+      // Save the reacted message for the recipient if offline
+      if (!connectedUsers.has(recipientId))
+        saveReactedMessage(message, recipientId);
+      else io.to(recipientId).emit(TOGGLE_MESSAGE_REACT, message);
+    } catch (error) {
+      console.error("Error in toggle-message-react:", error);
+    }
+  });
+
+  // Delete message
+  socket.on(DELETE_MESSAGE, async (data) => {
+    try {
+      const { messageId, recipientId, chatId } = data;
+
+      if (!connectedUsers.has(recipientId))
+        await deleteMessage(messageId, recipientId);
+      else io.to(recipientId).emit(DELETE_MESSAGE, messageId);
+    } catch (error) {
+      console.error("Error in delete-message:", error);
     }
   });
 };
