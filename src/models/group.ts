@@ -12,6 +12,7 @@ interface GroupDoc extends Document {
   privacy: "public" | "private";
   acceptMembers: "all" | "admin";
   banned: Schema.Types.ObjectId[];
+  members:number;
   restricted: {
     user: Schema.Types.ObjectId;
     until: Date;
@@ -25,9 +26,12 @@ interface GroupDoc extends Document {
 // Define schema for Group model
 const GroupSchema = new Schema(
   {
-    name: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
 
     description: { type: String },
+    groupImage: { type: String },
+    groupUniqueName: { type: String, unique: true },
+
     admins: [
       {
         admin: {
@@ -54,7 +58,7 @@ const GroupSchema = new Schema(
       enum: ["all", "admin"],
       default: "all",
     },
-    
+    members: { type: Number, default: 0 },
     owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -89,4 +93,4 @@ const GroupSchema = new Schema(
   }
 );
 const GroupModel = model<GroupDoc>("Group", GroupSchema);
-export {  GroupModel }; 
+export { GroupModel };

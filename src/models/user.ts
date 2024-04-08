@@ -9,9 +9,9 @@ interface UserDoc extends Document {
   profilePicture?: string;
   groups: {
     group: Schema.Types.ObjectId;
-    role: string;
-    status: string;
-    joinedAt: Date;
+    role?: string;
+    status?: string;
+    joinedAt?: Date;
   }[];
   chats: {
     chat: Schema.Types.ObjectId;
