@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 
 
-const MONGODB_URI = "mongodb://localhost:27017/babbleBox";
+const MONGODB_URI =
+  "mongodb+srv://ahmedmostafa:01144781238ahmed@ecommerce.lxpr7.mongodb.net/?retryWrites=true&w=majorityx";
 
 // Connect to MongoDB
 const startConnection = () => {

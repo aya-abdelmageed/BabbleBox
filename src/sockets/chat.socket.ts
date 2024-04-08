@@ -1,11 +1,10 @@
 import { ChatModel, MessageModel, UserModel } from "models/index";
-import
-  {
-    deleteMessage,
-    saveMessage,
-    saveReactedMessage,
-    togglePinMessage,
-  } from "redisControllers/chat.redis";
+import {
+  deleteMessage,
+  saveMessage,
+  saveReactedMessage,
+  togglePinMessage,
+} from "redisControllers/chat.redis";
 import { Socket } from "socket.io";
 import { connectedUsers } from "./index";
 
@@ -67,7 +66,7 @@ const chatSockets = (io: any, socket: Socket) => {
       };
       const newMessage = new MessageModel(newMessageData);
 
-      if (!connectedUsers.has(recipientId))
+      if (!connectedUsers[recipientId])
         saveMessage(newMessage, recipientId);
       else io.to(recipientId).emit(READ_MESSAGE, newMessage);
 
@@ -87,7 +86,7 @@ const chatSockets = (io: any, socket: Socket) => {
       if (!message) {
         return;
       }
-      if (!connectedUsers.has(recipientId))
+      if (!connectedUsers[recipientId])
         togglePinMessage(message, recipientId);
       else io.to(recipientId).emit(TOGGLE_PIN_MESSAGE, message);
     } catch (error) {
@@ -115,7 +114,7 @@ const chatSockets = (io: any, socket: Socket) => {
       }
 
       // Save the reacted message for the recipient if offline
-      if (!connectedUsers.has(recipientId))
+      if (!connectedUsers[recipientId])
         saveReactedMessage(message, recipientId);
       else io.to(recipientId).emit(TOGGLE_MESSAGE_REACT, message);
     } catch (error) {
@@ -128,7 +127,7 @@ const chatSockets = (io: any, socket: Socket) => {
     try {
       const { messageId, recipientId, chatId } = data;
 
-      if (!connectedUsers.has(recipientId))
+      if (!connectedUsers[recipientId])
         await deleteMessage(messageId, recipientId);
       else io.to(recipientId).emit(DELETE_MESSAGE, messageId);
     } catch (error) {
